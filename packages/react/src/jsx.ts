@@ -5,7 +5,7 @@ import {
 	Ref,
 	Props,
 	ElementType,
-	ReactElement
+	ReactElementType
 } from 'shared/ReactTypes';
 
 // ReactElement 构造函数
@@ -14,7 +14,7 @@ const ReactElement = function (
 	key: Key,
 	ref: Ref,
 	props: Props
-): ReactElement {
+): ReactElementType {
 	const element = {
 		$$typeof: REACT_ELEMENT_TYPE,
 		type,

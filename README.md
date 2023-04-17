@@ -24,3 +24,15 @@ pnpm i -D -w rollup
   - jsxDEV方法（dev环境）
   - jsx方法（prod环境）
   - React.createElement方法
+
+♢ 实现打包流程
+```
+pnpm i -D -w rollup-plugin-typescript2
+pnpm i -D -w @rollup/plugin-commonjs
+pnpm i -D -w rimraf
+pnpm i -D -w rollup-plugin-generate-package-json
+```
+对应上述3方法，打包对应文件：
+- react/jsx-dev-runtime.js（dev环境）
+- react/jsx-rumtime.js（prod环境）
+- React
