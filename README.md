@@ -47,3 +47,26 @@ pnpm link --global
 ```
 pnpm link react --global
 ```
+
+♢ 实现Reconciler架构 （diff算法）
+
+ReactElement如果作为核心模块操作的数据结构，存在的问题：
+- 无法表达节点之间的关系
+- 字段有限，不好拓展（比如：无法表达状态）
+
+所以，需要一种新的数据结构，他的特点：
+- 介于ReactElement与真实UI节点之间
+- 能够表达节点之间的关系
+- 方便拓展（不仅作为数据存储单元，也能作为工作单元）
+
+这就是FiberNode（虚拟DOM在React中的实现）
+
+对于同一个节点，比较其ReactElement与fiberNode，生成子fiberNode。并根据比较的结果生成不同标记（插入、删除、移动......），对应不同宿主环境API的执行。
+
+当所有ReactElement比较完后，会生成一棵fiberNode树，一共会存在两棵fiberNode树：
+- current：与视图中真实UI对应的fiberNode树
+- workInProgress：触发更新后，正在reconciler中计算的fiberNode树
+
+以DFS（深度优先遍历）的顺序遍历ReactElement，这是个递归的过程，存在递、归两个阶段：
+- 递：对应beginWork
+- 归：对应completeWork
