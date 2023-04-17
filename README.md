@@ -36,3 +36,14 @@ pnpm i -D -w rollup-plugin-generate-package-json
 - react/jsx-dev-runtime.js（dev环境）
 - react/jsx-rumtime.js（prod环境）
 - React
+
+♢ 调试打包结果
+
+在dist/node_modules/react中
+```
+pnpm link --global
+```
+在npx create-react-app创建的react项目中
+```
+pnpm link react --global
+```

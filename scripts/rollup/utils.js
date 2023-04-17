@@ -18,6 +18,7 @@ export const getPackageJson = (pkgName) => {
 	return JSON.parse(str);
 };
 
+// rollup原生支持ESM格式，所以对于CJS格式的包，我们需要先将它用该插件转为ESM格式。
 export const getBaseRollupPlugins = ({ typescript = {} } = {}) => {
 	return [cjs(), ts(typescript)];
 };
