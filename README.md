@@ -70,3 +70,14 @@ ReactElement如果作为核心模块操作的数据结构，存在的问题：
 以DFS（深度优先遍历）的顺序遍历ReactElement，这是个递归的过程，存在递、归两个阶段：
 - 递：对应beginWork
 - 归：对应completeWork
+
+♢ 触发更新
+
+常见的触发更新的方式
+- ReactDOM.createRoot().render（或老版的ReactDOM.render）
+- this.setState
+- useState的dispatch方法
+ 
+更新机制的组成部分
+- 代表更新的数据结构 —— Update
+- 消费update的数据结构 —— UpdateQueue
