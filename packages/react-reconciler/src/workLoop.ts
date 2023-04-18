@@ -11,14 +11,34 @@
 
 import { beginWork } from './beginWork';
 import { completeWork } from './completeWork';
-import { FiberNode } from './fiber';
+import { createWorkInProgress, FiberNode, FiberRootNode } from './fiber';
+import { HostRoot } from './workTags';
 
 let workInProgress: FiberNode | null = null;
 
-const prepareFreshStack = (fiber: FiberNode) => {
-	workInProgress = fiber;
+const prepareFreshStack = (root: FiberRootNode) => {
+	workInProgress = createWorkInProgress(root.current, {});
 };
-const renderRoot = (root: FiberNode) => {
+
+export const scheduleUpdateOnFiber = (fiber: FiberNode) => {
+	// fiberRootNode
+	const root = markUpdataFromFiberToRoot(fiber);
+	renderRoot(root);
+};
+
+const markUpdataFromFiberToRoot = (fiber: FiberNode) => {
+	let node = fiber;
+	let parent = node.return;
+	while (parent !== null) {
+		node = parent;
+		parent = node.return;
+	}
+	if (node.tag === HostRoot) {
+		return node.stateNode;
+	}
+	return null;
+};
+const renderRoot = (root: FiberRootNode) => {
 	// 初始化
 	prepareFreshStack(root);
 
