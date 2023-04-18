@@ -30,6 +30,7 @@ export class FiberNode {
 	memoizedState: any;
 	alternate: FiberNode | null; // 用于在current fiberNode树与workInProgress中切换
 	flags: Flags;
+	subtreeFlags: Flags;
 
 	updateQueue: unknown;
 	constructor(tag: WorkTag, pendingProps: Props, key: Key) {
@@ -60,6 +61,7 @@ export class FiberNode {
 		this.alternate = null;
 		// 副作用
 		this.flags = NoFlags;
+		this.subtreeFlags = NoFlags;
 	}
 }
 
@@ -92,6 +94,7 @@ export const createWorkInProgress = (
 		//update
 		wip.pendingProps = pendingProps;
 		wip.flags = NoFlags;
+		wip.subtreeFlags = NoFlags;
 	}
 	wip.type = current.type;
 	wip.updateQueue = current.updateQueue;
@@ -114,5 +117,5 @@ export const createFiberFromElement = (
 	}
 	const fiber = new FiberNode(fiberTag, props, key);
 	fiber.type = type;
-	return fiber; 
+	return fiber;
 };

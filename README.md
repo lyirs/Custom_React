@@ -108,3 +108,11 @@ HostComponent的beginWork工作流程
 HostText没有beginWork工作流程
 
 beginWork性能优化策略：「离屏DOM树」
+###  ♢ 实现completeWork
+需要解决的问题：
+- 对于Host类型fiberNode：构建离屏DOM树
+- 标记Update flag（TODO）
+
+completeWork性能优化策略：
+
+利用completeWork向上遍历（归）的流程，将子fiberNode的flags冒泡到父fiberNode，从而快速找到分布在不同fiberNode中的flags
