@@ -10,9 +10,9 @@
  */
 
 import { Container } from 'hostConfig';
-import { Props, Key, Ref } from 'shared/ReactTypes';
+import { Props, Key, Ref, ReactElementType } from 'shared/ReactTypes';
 import { Flags, NoFlags } from './fiberFlags';
-import { WorkTag } from './workTags';
+import { FunctionComponent, HostComponent, WorkTag } from './workTags';
 
 export class FiberNode {
 	type: any;
@@ -99,4 +99,20 @@ export const createWorkInProgress = (
 	wip.memoizedProps = current.memoizedProps;
 	wip.memoizedState = current.memoizedState;
 	return wip;
+};
+
+export const createFiberFromElement = (
+	element: ReactElementType
+): FiberNode => {
+	const { type, key, props } = element;
+	let fiberTag: WorkTag = FunctionComponent;
+	if (typeof type === 'string') {
+		// <div/> type: 'div
+		fiberTag = HostComponent;
+	} else if (typeof type !== 'function' && __DEV__) {
+		console.warn('未实现的type类型', element);
+	}
+	const fiber = new FiberNode(fiberTag, props, key);
+	fiber.type = type;
+	return fiber; 
 };

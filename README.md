@@ -1,8 +1,8 @@
 # 从零开始实现React18
 
-♢ 定义项目结构（monorepo）
+### ♢ 定义项目结构（monorepo）
 
-♢ 定义开发规范
+###  ♢ 定义开发规范
 ```
 pnpm i eslint -D -w
 pnpm i -D -w @typescript-eslint/eslint-plugin 
@@ -11,21 +11,21 @@ pnpm i eslint-config-prettier eslint-plugin-prettier -D -w
 pnpm i husky -D -w
 pnpm i commitlint @commitlint/cli @commitlint/config-conventional -D -w
 ```
-♢ 定义打包工具
+###  ♢ 定义打包工具
 ```
 pnpm i -D -w rollup
 ```
-♢ React项目结构
+###  ♢ React项目结构
 - react（宿主环境无关的公用方法）
 - shared（公用辅助方法，宿主环境无关）
 
-♢ JSX转换 运行时实现 （编译时由babel编译实现）
+###  ♢ JSX转换 运行时实现 （编译时由babel编译实现）
 - 实现jsx方法
   - jsxDEV方法（dev环境）
   - jsx方法（prod环境）
   - React.createElement方法
 
-♢ 实现打包流程
+###  ♢ 实现打包流程
 ```
 pnpm i -D -w rollup-plugin-typescript2
 pnpm i -D -w @rollup/plugin-commonjs
@@ -37,7 +37,7 @@ pnpm i -D -w rollup-plugin-generate-package-json
 - react/jsx-rumtime.js（prod环境）
 - React
 
-♢ 调试打包结果
+###  ♢ 调试打包结果
 
 在dist/node_modules/react中
 ```
@@ -48,7 +48,7 @@ pnpm link --global
 pnpm link react --global
 ```
 
-♢ 实现Reconciler架构 （diff算法）
+###  ♢ 实现Reconciler架构 （diff算法）
 
 ReactElement如果作为核心模块操作的数据结构，存在的问题：
 - 无法表达节点之间的关系
@@ -71,7 +71,7 @@ ReactElement如果作为核心模块操作的数据结构，存在的问题：
 - 递：对应beginWork
 - 归：对应completeWork
 
-♢ 触发更新
+###  ♢ 触发更新
 
 常见的触发更新的方式
 - ReactDOM.createRoot().render（或老版的ReactDOM.render）
@@ -87,3 +87,24 @@ ReactElement如果作为核心模块操作的数据结构，存在的问题：
 需要考虑的事情：
 - 更新可能发生于任意组件，而更新流程是从根节点递归的
 - 需要一个统一的根节点保存通用信息
+
+更新流程的目的：
+
+- 生成wip fiberNode树
+- 标记副作用flags
+
+更新流程的步骤：
+
+- 递：beginWork
+- 归：completeWork
+###  ♢ 实现beginwork
+HostRoot的beginWork工作流程
+- 计算状态的最新值
+- 创造子fiberNode
+
+HostComponent的beginWork工作流程
+- 创造子fiberNode
+
+HostText没有beginWork工作流程
+
+beginWork性能优化策略：「离屏DOM树」
