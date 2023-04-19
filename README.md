@@ -48,6 +48,12 @@ pnpm link --global
 pnpm link react --global
 ```
 
+react内部3个阶段：
+
+- schedule阶段
+- render阶段（beginWork completeWork）
+- commit阶段（commitWork）
+
 ###  ♢ 实现Reconciler架构 （diff算法）
 
 ReactElement如果作为核心模块操作的数据结构，存在的问题：
@@ -116,3 +122,18 @@ beginWork性能优化策略：「离屏DOM树」
 completeWork性能优化策略：
 
 利用completeWork向上遍历（归）的流程，将子fiberNode的flags冒泡到父fiberNode，从而快速找到分布在不同fiberNode中的flags
+
+###  ♢ 实现commit阶段
+- beforeMutation阶段
+- mutation阶段
+- layout阶段
+  
+当前commit阶段要执行的任务：
+- fiber树的切换
+- 执行Placement对应操作
+  
+###  ♢ 打包ReactDOM
+需要注意的点：
+
+- 兼容原版React的导出
+- 处理hostConfig的指向
