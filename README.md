@@ -146,3 +146,12 @@ FC的工作同样植根于：
 
 - beginWork
 - completeWork
+
+
+###  ♢ 加入vite的实时调试
+使用vite而不是webpack作为demo调试的原因：
+
+- 在开发阶段编译速度快于webpack
+- vite的插件体系与rollup兼容
+
+在 package.json中运行vite，需要加入参数--force，禁掉包缓存
