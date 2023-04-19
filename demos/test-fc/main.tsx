@@ -1,10 +1,14 @@
 import React from 'react';
+import { useState } from 'react';
 import ReactDOM from 'react-dom/client';
 
+console.log(import.meta.hot);
+
 const App = () => {
+	const [num, setNum] = useState(100);
 	return (
 		<div>
-			<span>big-react</span>
+			<span>{num}</span>
 		</div>
 	);
 };

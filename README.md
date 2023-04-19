@@ -169,3 +169,8 @@ fiberNode中可用的字段：
 
 - fiberNode.memoizedState对应Hooks链表
 - 链表中每个hook对应自身的数据
+
+实现useState
+
+- 实现mount时useState的实现
+- 实现dispatch方法，并接入现有更新流程内
