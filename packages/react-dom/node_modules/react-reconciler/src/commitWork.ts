@@ -84,7 +84,7 @@ const appendPlacementNodeIntoContainer = (
 ) => {
 	// 传进来的finishedWork不一定是Host类型的
 	if (finishedWork.tag === HostComponent || finishedWork.tag === HostText) {
-		appendChildToContainer(finishedWork.stateNode, hostParent);
+		appendChildToContainer(hostParent, finishedWork.stateNode);
 		return;
 	}
 	const child = finishedWork.child;

@@ -137,3 +137,6 @@ completeWork性能优化策略：
 
 - 兼容原版React的导出
 - 处理hostConfig的指向
+```
+pnpm i -D -w @rollup/plugin-alias
+```

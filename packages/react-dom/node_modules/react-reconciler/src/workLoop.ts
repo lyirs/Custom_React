@@ -84,11 +84,11 @@ const commitRoot = (root: FiberRootNode) => {
 	const rootHasEffect = (finishedWork.flags & MutationMask) !== NoFlags;
 
 	if (subtreeHasEffevt || rootHasEffect) {
-		// 1.beforeMutation
+		// TODO 1.beforeMutation
 		// 2.mutation  Placement
 		commitMutationEffects(finishedWork);
 		root.current = finishedWork;
-		// 3.layout
+		// TODO 3.layout
 	} else {
 		root.current = finishedWork;
 	}
