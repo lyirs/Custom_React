@@ -140,3 +140,9 @@ completeWork性能优化策略：
 ```
 pnpm i -D -w @rollup/plugin-alias
 ```
+
+###  ♢ 实现FunctionComponent
+FC的工作同样植根于：
+
+- beginWork
+- completeWork
