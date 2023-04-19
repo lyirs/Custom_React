@@ -1,4 +1,3 @@
-// 模拟实现
 export type Container = any;
 
 export const createInstance = (...args: any) => {
