@@ -155,3 +155,17 @@ FC的工作同样植根于：
 - vite的插件体系与rollup兼容
 
 在 package.json中运行vite，需要加入参数--force，禁掉包缓存
+
+###  ♢ 实现Hooks架构
+
+Reconciler  ---  内部数据共享层  ---  React
+
+fiberNode中可用的字段：
+
+- memoizedState
+- updateQueue
+
+对于FC对应的fiberNode，存在两层数据：
+
+- fiberNode.memoizedState对应Hooks链表
+- 链表中每个hook对应自身的数据
