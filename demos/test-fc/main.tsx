@@ -6,11 +6,12 @@ console.log(import.meta.hot);
 
 const App = () => {
 	const [num, setNum] = useState(100);
-	return (
-		<div>
-			<span>{num}</span>
-		</div>
-	);
+	window.setNum = setNum;
+	return num === 3 ? <Child /> : <div>{num}</div>;
+};
+
+const Child = () => {
+	return <span>react</span>;
 };
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
