@@ -180,3 +180,21 @@ fiberNode中可用的字段：
 pnpm i -D -w jest jest-config jest-environment-jsdom
 pnpm i -D -w @babel/core @babel/preset-env @babel/plugin-transform-react-jsx
 ```
+
+###  ♢ update流程
+update流程与mount流程的区别。
+
+对于beginWork：
+- 需要处理ChildDeletion的情况
+- 需要处理节点移动的情况（abc -> bca）
+
+对于completeWork：
+- 需要处理HostText内容更新的情况
+- 需要处理HostComponent属性变化的情况
+
+对于commitWork：
+- 对于ChildDeletion，需要遍历被删除的子树
+- 对于Update，需要更新文本内容
+
+对于useState：
+- 实现相对于mountState的updateState

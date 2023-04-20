@@ -5,7 +5,7 @@ import {
 	createTextInstance
 } from 'hostConfig';
 import { FiberNode } from './fiber';
-import { NoFlags } from './fiberFlags';
+import { NoFlags, Update } from './fiberFlags';
 import {
 	FunctionComponent,
 	HostComponent,
@@ -13,6 +13,9 @@ import {
 	HostText
 } from './workTags';
 
+const markUpdate = (fiber: FiberNode) => {
+	fiber.flags |= Update;
+};
 // 递归中的归阶段
 export const completeWork = (wip: FiberNode) => {
 	const newProps = wip.pendingProps;
@@ -21,7 +24,7 @@ export const completeWork = (wip: FiberNode) => {
 	switch (wip.tag) {
 		case HostComponent:
 			if (current !== null && wip.stateNode) {
-				// update
+				// TODO update
 			} else {
 				// 1. 构建DOM
 				const instance = createInstance(wip.type, newProps);
@@ -34,6 +37,11 @@ export const completeWork = (wip: FiberNode) => {
 		case HostText:
 			if (current !== null && wip.stateNode) {
 				// update
+				const oldText = current.memoizedProps.content;
+				const newText = newProps.content;
+				if (oldText !== newText) {
+					markUpdate(wip);
+				}
 			} else {
 				// 1. 构建DOM
 				const instance = createTextInstance(newProps.content);
