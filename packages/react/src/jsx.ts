@@ -26,6 +26,14 @@ const ReactElement = function (
 	return element;
 };
 
+export const isValidElement = (object: any) => {
+	return (
+		typeof object === 'object' &&
+		object !== null &&
+		object.$$typeof === REACT_ELEMENT_TYPE
+	);
+};
+
 /**
  *  <div id="333">123</div>
  *
