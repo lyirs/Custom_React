@@ -117,7 +117,7 @@ const ChildReconciler = (shouldTrackEffects: boolean) => {
 		let lastNewFiber: FiberNode | null = null;
 		// 创建的第一个Fiber
 		let firstNewFiber: FiberNode | null = null;
-		// 1. 将current保存在map中
+		// 1. 将current保存在Map中
 		const existingChildren: ExistignChildren = new Map();
 		let current = currentFirstChild;
 		while (current !== null) {
@@ -128,6 +128,8 @@ const ChildReconciler = (shouldTrackEffects: boolean) => {
 
 		for (let i = 0; i < newChild.length; i++) {
 			// 2. 遍历newChild，寻找是否可复用
+			// 在Map中存在对应current fiber，且可以复用
+			// 在Map中不存在对应current fiber，或不能复用
 			const after = newChild[i];
 
 			const newFiber = updateFromMap(returnFiber, existingChildren, i, after);

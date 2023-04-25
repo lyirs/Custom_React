@@ -205,3 +205,17 @@ update流程与mount流程的区别。
 - 模拟实现浏览器事件捕获、冒泡流程
 - 实现合成事件对象
 - 方便后续扩展
+
+###  ♢ 实现Diff算法
+对于同级多节点Diff的支持
+
+单节点需要支持的情况：
+
+- 插入 Placement
+- 删除 ChildDeletion
+- 
+多节点需要支持的情况：
+
+- 插入 Placement
+- 删除 ChildDeletion
+- 移动 Placement
