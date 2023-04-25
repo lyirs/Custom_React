@@ -54,7 +54,7 @@ react内部3个阶段：
 - render阶段（beginWork completeWork）
 - commit阶段（commitWork）
 
-###  ♢ 实现Reconciler架构 （diff算法）
+###  ♢ 实现Reconciler架构 
 
 ReactElement如果作为核心模块操作的数据结构，存在的问题：
 - 无法表达节点之间的关系
