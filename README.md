@@ -213,9 +213,36 @@ update流程与mount流程的区别。
 
 - 插入 Placement
 - 删除 ChildDeletion
-- 
+
 多节点需要支持的情况：
 
 - 插入 Placement
 - 删除 ChildDeletion
 - 移动 Placement
+
+###  ♢ 实现Fragment
+```
+<>
+  <div></div>
+  <div></div>
+</>
+```
+```
+<ul>
+  <>
+    <li>1</li>
+    <li>2</li>
+  </>
+  <li>3</li>
+  <li>4</li>
+</ul>
+```
+```
+// arr = [<li>c</li>, <li>d</li>]
+
+<ul>
+  <li>a</li>
+  <li>b</li>
+  {arr}
+</ul>
+```

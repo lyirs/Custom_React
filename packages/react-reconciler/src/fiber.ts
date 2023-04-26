@@ -12,7 +12,12 @@
 import { Container } from 'hostConfig';
 import { Props, Key, Ref, ReactElementType } from 'shared/ReactTypes';
 import { Flags, NoFlags } from './fiberFlags';
-import { FunctionComponent, HostComponent, WorkTag } from './workTags';
+import {
+	Fragment,
+	FunctionComponent,
+	HostComponent,
+	WorkTag
+} from './workTags';
 
 export class FiberNode {
 	type: any;
@@ -35,7 +40,7 @@ export class FiberNode {
 	updateQueue: unknown;
 	constructor(tag: WorkTag, pendingProps: Props, key: Key) {
 		this.tag = tag;
-		this.key = key;
+		this.key = key || null;
 		// HostComponent <div> div DOM
 		this.stateNode = null;
 		// FunctionComponent () => {}
@@ -119,5 +124,13 @@ export const createFiberFromElement = (
 	}
 	const fiber = new FiberNode(fiberTag, props, key);
 	fiber.type = type;
+	return fiber;
+};
+
+export const createFiberFromFragment = (
+	elements: any[],
+	key: Key
+): FiberNode => {
+	const fiber = new FiberNode(Fragment, elements, key);
 	return fiber;
 };
