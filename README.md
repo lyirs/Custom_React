@@ -221,6 +221,7 @@ update流程与mount流程的区别。
 - 移动 Placement
 
 ###  ♢ 实现Fragment
+如以下情况：
 ```
 <>
   <div></div>
