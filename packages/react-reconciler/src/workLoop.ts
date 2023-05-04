@@ -14,6 +14,7 @@ import { commitMutationEffects } from './commitWork';
 import { completeWork } from './completeWork';
 import { createWorkInProgress, FiberNode, FiberRootNode } from './fiber';
 import { MutationMask, NoFlags } from './fiberFlags';
+import { Lane, mergeLanes } from './fiberLanes';
 import { HostRoot } from './workTags';
 
 let workInProgress: FiberNode | null = null;
@@ -22,10 +23,16 @@ const prepareFreshStack = (root: FiberRootNode) => {
 	workInProgress = createWorkInProgress(root.current, {});
 };
 
-export const scheduleUpdateOnFiber = (fiber: FiberNode) => {
+export const scheduleUpdateOnFiber = (fiber: FiberNode, lane: Lane) => {
+	// TODO 调度
 	// fiberRootNode
 	const root = markUpdataFromFiberToRoot(fiber);
+	markRootUpdated(root, lane);
 	renderRoot(root);
+};
+
+export const markRootUpdated = (root: FiberRootNode, lane: Lane) => {
+	root.pendingLanes = mergeLanes(root.pendingLanes, lane);
 };
 
 const markUpdataFromFiberToRoot = (fiber: FiberNode) => {
