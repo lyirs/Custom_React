@@ -23,6 +23,7 @@ export const flushSyncCallbacks = () => {
 			}
 		} finally {
 			isFlushingSyncQueue = false;
+			syncQueue = null;
 		}
 	}
 };
