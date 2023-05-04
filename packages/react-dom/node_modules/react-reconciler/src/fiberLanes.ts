@@ -12,3 +12,7 @@ export const mergeLanes = (laneA: Lane, laneB: Lane): Lanes => {
 export const requestUpdateLanes = () => {
 	return SyncLane;
 };
+
+export const getHighestPriorityLane = (lanes: Lanes): Lane => {
+	return lanes & -lanes;
+};
