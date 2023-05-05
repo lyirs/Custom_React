@@ -259,3 +259,14 @@ React批处理的时机既有宏任务，也有微任务。
 - 需要能够合并一个宏任务/微任务中触发的所有更新
 - 需要一套算法，用于决定哪个优先级优先进入render阶段
 
+###  ♢ 实现useEffect
+effect数据结构
+
+effect的工作流程
+- 调度副作用
+```
+pnpm i -w scheduler 
+pnpm i -D -w @types/scheduler
+```
+- 收集回调
+- 执行副作用
