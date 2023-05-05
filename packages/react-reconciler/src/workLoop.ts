@@ -169,8 +169,9 @@ const commitRoot = (root: FiberRootNode) => {
 	// root flags
 	// root subtreeFlags
 	const subtreeHasEffevt =
-		(finishedWork.subtreeFlags & MutationMask) !== NoFlags;
-	const rootHasEffect = (finishedWork.flags & MutationMask) !== NoFlags;
+		(finishedWork.subtreeFlags & (MutationMask | PassiveMask)) !== NoFlags;
+	const rootHasEffect =
+		(finishedWork.flags & (MutationMask | PassiveMask)) !== NoFlags;
 
 	if (subtreeHasEffevt || rootHasEffect) {
 		// TODO 1.beforeMutation
