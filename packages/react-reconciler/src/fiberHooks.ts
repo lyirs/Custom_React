@@ -2,7 +2,9 @@ import { Dispatch, Dispatcher } from 'react/src/currentDispatcher';
 import internals from 'shared/internals';
 import { Action } from 'shared/ReactTypes';
 import { FiberNode } from './fiber';
+import { Flags, PassiveEffect } from './fiberFlags';
 import { Lane, NoLane, requestUpdateLanes } from './fiberLanes';
+import { HookHasEffect, Passive } from './hookEffectTags';
 import {
 	createUpdate,
 	createUpdateQueue,
@@ -25,6 +27,21 @@ interface Hook {
 	updateQueue: unknown;
 	next: Hook | null;
 }
+
+export interface Effect {
+	tag: Flags;
+	create: EffectCallback | void;
+	destory: EffectCallback | void;
+	deps: EffectDeps;
+	next: Effect | null;
+}
+
+export interface FCUpdateQueue<State> extends UpdateQueue<State> {
+	lastEffect: Effect | null;
+}
+
+type EffectCallback = () => void;
+type EffectDeps = any[] | null;
 
 export const renderWithHooks = (wip: FiberNode, lane: Lane) => {
 	// 赋值操作
@@ -97,8 +114,67 @@ const updateState = <State>(): [State, Dispatch<State>] => {
 	return [hook.memoizedState, queue.dispatch as Dispatch<State>];
 };
 
+const mountEffect = (
+	create: EffectCallback | void,
+	deps: EffectDeps | void
+) => {
+	const hook = updateWorkInProgressHook();
+	const nextDeps = deps === undefined ? null : deps;
+	(currentlyRenderingFiber as FiberNode).flags |= PassiveEffect;
+
+	hook.memoizedState = pushEffect(
+		Passive | HookHasEffect,
+		create,
+		undefined,
+		nextDeps
+	);
+};
+
+const pushEffect = (
+	hookFlags: Flags,
+	create: EffectCallback | void,
+	destory: EffectCallback | void,
+	deps: EffectDeps
+): Effect => {
+	const effect: Effect = {
+		tag: hookFlags,
+		create,
+		destory,
+		deps,
+		next: null
+	};
+	const fiber = currentlyRenderingFiber as FiberNode;
+	const updateQueue = fiber.updateQueue as FCUpdateQueue<any>;
+	if (updateQueue === null) {
+		const updateQueue = createFCUpdateQueue();
+		fiber.updateQueue = updateQueue;
+		effect.next = effect;
+		updateQueue.lastEffect = effect;
+	} else {
+		// 插入effect
+		const lastEffect = updateQueue.lastEffect;
+		if (lastEffect === null) {
+			effect.next = effect;
+			updateQueue.lastEffect = effect;
+		} else {
+			const firstEffect = lastEffect.next;
+			lastEffect.next = effect;
+			effect.next = firstEffect;
+			updateQueue.lastEffect = effect;
+		}
+	}
+	return effect;
+};
+
+const createFCUpdateQueue = <State>() => {
+	const updateQueue = createUpdateQueue<State>() as FCUpdateQueue<State>;
+	updateQueue.lastEffect = null;
+	return updateQueue;
+};
+
 const HooksDispatcherOnMount: Dispatcher = {
-	useState: mountState
+	useState: mountState,
+	useEffect: mountEffect
 };
 
 const HooksDispatcherOnUpdate: Dispatcher = {
