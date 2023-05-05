@@ -14,7 +14,7 @@ import { beginWork } from './beginWork';
 import { commitMutationEffects } from './commitWork';
 import { completeWork } from './completeWork';
 import { createWorkInProgress, FiberNode, FiberRootNode } from './fiber';
-import { MutationMask, NoFlags } from './fiberFlags';
+import { MutationMask, NoFlags, PassiveMask } from './fiberFlags';
 import {
 	getHighestPriorityLane,
 	Lane,
@@ -25,9 +25,14 @@ import {
 } from './fiberLanes';
 import { flushSyncCallbacks, scheduleSyncCallback } from './syncTaskQueue';
 import { HostRoot } from './workTags';
+import {
+	unstable_scheduleCallback as scheduleCallback,
+	unstable_NormalPriority as NormalPriority
+} from 'scheduler';
 
 let workInProgress: FiberNode | null = null;
 let wipRootRenderLane: Lane = NoLane;
+let rootDoesHasPassiveEffects = false;
 
 const prepareFreshStack = (root: FiberRootNode, lane: Lane) => {
 	workInProgress = createWorkInProgress(root.current, {});
@@ -135,6 +140,19 @@ const commitRoot = (root: FiberRootNode) => {
 
 	markRootFinished(root, lane);
 
+	if (
+		(finishedWork.flags & PassiveMask) !== NoFlags ||
+		(finishedWork.subtreeFlags & PassiveMask) !== NoFlags
+	) {
+		if (!rootDoesHasPassiveEffects) {
+			rootDoesHasPassiveEffects = true;
+			// 调度副作用
+			scheduleCallback(NormalPriority, () => {
+				// 执行副作用
+				return;
+			});
+		}
+	}
 	// 判断是否存在3个子阶段需要执行的操作
 	// root flags
 	// root subtreeFlags
@@ -145,12 +163,15 @@ const commitRoot = (root: FiberRootNode) => {
 	if (subtreeHasEffevt || rootHasEffect) {
 		// TODO 1.beforeMutation
 		// 2.mutation  Placement
-		commitMutationEffects(finishedWork);
+		commitMutationEffects(finishedWork, root);
 		root.current = finishedWork;
 		// TODO 3.layout
 	} else {
 		root.current = finishedWork;
 	}
+
+	rootDoesHasPassiveEffects = false;
+	ensureRootIsScheduled(root);
 };
 
 const workLoop = () => {
