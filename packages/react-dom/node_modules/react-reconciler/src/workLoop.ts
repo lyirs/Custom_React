@@ -11,9 +11,19 @@
 
 import { scheduleMicroTask } from 'hostConfig';
 import { beginWork } from './beginWork';
-import { commitMutationEffects } from './commitWork';
+import {
+	commitHookEffectListCreate,
+	commitHookEffectListDestroy,
+	commitHookEffectListUnmount,
+	commitMutationEffects
+} from './commitWork';
 import { completeWork } from './completeWork';
-import { createWorkInProgress, FiberNode, FiberRootNode } from './fiber';
+import {
+	createWorkInProgress,
+	FiberNode,
+	FiberRootNode,
+	PendingPassiveEffects
+} from './fiber';
 import { MutationMask, NoFlags, PassiveMask } from './fiberFlags';
 import {
 	getHighestPriorityLane,
@@ -29,6 +39,7 @@ import {
 	unstable_scheduleCallback as scheduleCallback,
 	unstable_NormalPriority as NormalPriority
 } from 'scheduler';
+import { HookHasEffect, Passive } from './hookEffectTags';
 
 let workInProgress: FiberNode | null = null;
 let wipRootRenderLane: Lane = NoLane;
@@ -149,6 +160,7 @@ const commitRoot = (root: FiberRootNode) => {
 			// 调度副作用
 			scheduleCallback(NormalPriority, () => {
 				// 执行副作用
+				flushPassiveEffects(root.pendingPassiveEffects);
 				return;
 			});
 		}
@@ -172,6 +184,25 @@ const commitRoot = (root: FiberRootNode) => {
 
 	rootDoesHasPassiveEffects = false;
 	ensureRootIsScheduled(root);
+};
+
+const flushPassiveEffects = (pendingPassiveEffects: PendingPassiveEffects) => {
+	// 遍历effect
+	// 首先触发所有unmount effect，且对于某个fiber，如果触发了unmount destroy，本次更新不会再触发update create
+	pendingPassiveEffects.unmount.forEach((effect) => {
+		commitHookEffectListUnmount(Passive, effect);
+	});
+	pendingPassiveEffects.unmount = [];
+	// 触发所有上次更新的destroy
+	pendingPassiveEffects.update.forEach((effect) => {
+		commitHookEffectListDestroy(Passive | HookHasEffect, effect);
+	});
+	// 触发所有这次更新的create
+	pendingPassiveEffects.update.forEach((effect) => {
+		commitHookEffectListCreate(Passive | HookHasEffect, effect);
+	});
+	pendingPassiveEffects.update = [];
+	flushSyncCallbacks();
 };
 
 const workLoop = () => {

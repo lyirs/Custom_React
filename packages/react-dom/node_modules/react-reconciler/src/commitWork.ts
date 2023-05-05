@@ -9,13 +9,16 @@ import {
 import { FiberNode, FiberRootNode, PendingPassiveEffects } from './fiber';
 import {
 	ChildDeletion,
+	Flags,
 	MutationMask,
 	NoFlags,
 	PassiveEffect,
+	PassiveMask,
 	Placement,
 	Update
 } from './fiberFlags';
 import { Effect, FCUpdateQueue } from './fiberHooks';
+import { HookHasEffect } from './hookEffectTags';
 import {
 	FunctionComponent,
 	HostComponent,
@@ -35,7 +38,7 @@ export const commitMutationEffects = (
 		const child: FiberNode | null = nextEffect.child;
 
 		if (
-			(nextEffect.subtreeFlags & MutationMask) !== NoFlags &&
+			(nextEffect.subtreeFlags & (MutationMask | PassiveMask)) !== NoFlags &&
 			child !== null
 		) {
 			nextEffect = child;
@@ -108,6 +111,58 @@ const commitPassiveEffect = (
 		}
 		root.pendingPassiveEffects[type].push(updateQueue.lastEffect as Effect);
 	}
+};
+
+export const commitHookEffectList = (
+	flags: Flags,
+	lastEffect: Effect,
+	callback: (effect: Effect) => void
+) => {
+	let effect = lastEffect.next as Effect;
+
+	do {
+		if ((effect.tag & flags) === flags) {
+			callback(effect);
+		}
+		effect = effect.next as Effect;
+	} while (effect !== lastEffect.next);
+};
+
+export const commitHookEffectListUnmount = (
+	flags: Flags,
+	lastEffect: Effect
+) => {
+	commitHookEffectList(flags, lastEffect, (effect) => {
+		const destroy = effect.destory;
+		if (typeof destroy === 'function') {
+			destroy();
+		}
+		effect.tag &= ~HookHasEffect;
+	});
+};
+
+export const commitHookEffectListDestroy = (
+	flags: Flags,
+	lastEffect: Effect
+) => {
+	commitHookEffectList(flags, lastEffect, (effect) => {
+		const destroy = effect.destory;
+		if (typeof destroy === 'function') {
+			destroy();
+		}
+	});
+};
+
+export const commitHookEffectListCreate = (
+	flags: Flags,
+	lastEffect: Effect
+) => {
+	commitHookEffectList(flags, lastEffect, (effect) => {
+		const create = effect.create;
+		if (typeof create === 'function') {
+			effect.destory = create();
+		}
+	});
 };
 
 const recodeHostChildrenToDelete = (
