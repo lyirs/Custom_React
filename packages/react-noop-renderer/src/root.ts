@@ -1,5 +1,6 @@
 // ReactDOM.createRoot(root).render(<App />);
 
+import { Instance } from 'hostConfig';
 import {
 	createContainer,
 	updateContainer
@@ -17,9 +18,19 @@ export const createRoot = () => {
 	// @ts-ignore
 	const root = createContainer(container);
 
+	const getChildren = (parent: Container | Instance) => {
+		if (parent) {
+			return parent.children;
+		}
+		return null;
+	};
+
 	return {
 		render(element: ReactElementType) {
 			return updateContainer(element, root);
+		},
+		getChildren() {
+			return getChildren(container);
 		}
 	};
 };
