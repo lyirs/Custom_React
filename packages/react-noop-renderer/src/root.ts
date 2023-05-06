@@ -1,13 +1,10 @@
-// ReactDOM.createRoot(root).render(<App />);
-
-import { Instance } from './hostConfig';
 import {
 	createContainer,
 	updateContainer
 } from 'react-reconciler/src/fiberReconciler';
 import { REACT_ELEMENT_TYPE, REACT_FRAGMENT_TYPE } from 'shared/ReactSymbols';
 import { ReactElementType } from 'shared/ReactTypes';
-import { Container } from './hostConfig';
+import { Container, Instance } from './hostConfig';
 
 let idCounter = 0;
 export const createRoot = () => {
