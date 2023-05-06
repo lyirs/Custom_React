@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
+import ReactDOM from 'react-noop-renderer';
 
 function App() {
 	return (
@@ -14,6 +14,8 @@ function Child() {
 	return 'Child';
 }
 
-ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-	<App />
-);
+const root = ReactDOM.createRoot();
+
+root.render(<App />);
+
+window.root = root;
