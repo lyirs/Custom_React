@@ -270,3 +270,14 @@ pnpm i -D -w @types/scheduler
 ```
 - 收集回调
 - 执行副作用
+
+###  ♢ 实现noop-renderer
+为了测试Reconciler，我们需要构建「宿主环境无关的渲染器」，这就是react-noop-renderer
+
+在ReactDOM宿主环境的原生节点是DOM节点，在Noop-Renderer宿主环境包括三类节点：
+
+- Instance（HostComponent）
+- TextInstance（HostText）
+- Container（HostRoot）
+
+除此以外，还需实现「以ReactElement的形式导出树状结构」。
