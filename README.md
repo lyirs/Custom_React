@@ -281,3 +281,13 @@ pnpm i -D -w @types/scheduler
 - Container（HostRoot）
 
 除此以外，还需实现「以ReactElement的形式导出树状结构」。
+
+完善Reconciler测试环境:
+```
+pnpm i -D -w jest-react
+```
+当前我们为测试做的准备:
+
+- 针对ReactDOM宿主环境：ReactTestUtils
+- 针对Reconciler的测试：React-Noop-Renderer
+- 针对并发环境的测试：jest-react、Scheduler、React-Noop-Renderer配合使用
