@@ -3,13 +3,14 @@ import internals from 'shared/internals';
 import { Action } from 'shared/ReactTypes';
 import { FiberNode } from './fiber';
 import { Flags, PassiveEffect } from './fiberFlags';
-import { Lane, NoLane, requestUpdateLanes } from './fiberLanes';
+import { Lane, NoLane, requestUpdateLane } from './fiberLanes';
 import { HookHasEffect, Passive } from './hookEffectTags';
 import {
 	createUpdate,
 	createUpdateQueue,
 	enqueueUpdate,
 	processUpdateQueue,
+	Update,
 	UpdateQueue
 } from './updateQueue';
 import { scheduleUpdateOnFiber } from './workLoop';
@@ -26,12 +27,14 @@ interface Hook {
 	memoizedState: any;
 	updateQueue: unknown;
 	next: Hook | null;
+	baseState: any;
+	baseQueue: Update<any> | null;
 }
 
 export interface Effect {
 	tag: Flags;
 	create: EffectCallback | void;
-	destory: EffectCallback | void;
+	destroy: EffectCallback | void;
 	deps: EffectDeps;
 	next: Effect | null;
 }
@@ -101,16 +104,44 @@ const updateState = <State>(): [State, Dispatch<State>] => {
 
 	// 计算新的state的逻辑
 	const queue = hook.updateQueue as UpdateQueue<State>;
+	const baseState = hook.baseState;
+
 	const pending = queue.shared.pending;
-	queue.shared.pending = null;
+	const current = currentHook as Hook;
+
+	let baseQueue = current.baseQueue;
 
 	if (pending !== null) {
-		const { memoizedState } = processUpdateQueue(
-			hook.memoizedState,
-			pending,
-			renderLane
-		);
-		hook.memoizedState = memoizedState;
+		// pending baseQueue update保存在current中
+		if (baseQueue !== null) {
+			// ep:
+			// baseQueue b2 -> b0 -> b1 -> b2
+			// pendingQueue p2 -> p0 -> p1 -> p2
+			// b0
+			const baseFirst = baseQueue.next;
+			// p0
+			const pendingFirst = pending.next;
+			// b2 -> p0
+			baseQueue.next = pendingFirst;
+			// p2 -> b0
+			pending.next = baseFirst;
+			// p2 -> b0 -> b1 -> b2 -> p0 -> p1 -> p2
+		}
+		baseQueue = pending;
+		// 保存在current中
+		current.baseQueue = pending;
+		queue.shared.pending = null;
+
+		if (baseQueue !== null) {
+			const {
+				memoizedState,
+				baseQueue: newBaseQueue,
+				baseState: newBaseState
+			} = processUpdateQueue(baseState, baseQueue, renderLane);
+			hook.memoizedState = memoizedState;
+			hook.baseState = newBaseState;
+			hook.baseQueue = newBaseQueue;
+		}
 	}
 
 	return [hook.memoizedState, queue.dispatch as Dispatch<State>];
@@ -135,13 +166,13 @@ const mountEffect = (
 const pushEffect = (
 	hookFlags: Flags,
 	create: EffectCallback | void,
-	destory: EffectCallback | void,
+	destroy: EffectCallback | void,
 	deps: EffectDeps
 ): Effect => {
 	const effect: Effect = {
 		tag: hookFlags,
 		create,
-		destory,
+		destroy,
 		deps,
 		next: null
 	};
@@ -178,7 +209,7 @@ const updateEffect = (
 
 	if (currentHook !== null) {
 		const prevEffect = currentHook.memoizedState as Effect;
-		destroy = prevEffect.destory;
+		destroy = prevEffect.destroy;
 
 		if (nextDeps !== null) {
 			// 浅比较依赖
@@ -233,7 +264,7 @@ const dispatchSetState = <State>(
 	updateQueue: UpdateQueue<State>,
 	action: Action<State>
 ) => {
-	const lane = requestUpdateLanes();
+	const lane = requestUpdateLane();
 	const update = createUpdate(action, lane);
 	enqueueUpdate(updateQueue, update);
 	scheduleUpdateOnFiber(fiber, lane);
@@ -243,7 +274,9 @@ const mountWorkInProgressHook = (): Hook => {
 	const hook: Hook = {
 		memoizedState: null,
 		updateQueue: null,
-		next: null
+		next: null,
+		baseQueue: null,
+		baseState: null
 	};
 	if (workInProgressHook === null) {
 		// mount时 第一个hook
@@ -290,7 +323,9 @@ const updateWorkInProgressHook = (): Hook => {
 	const newHook = {
 		memoizedState: currentHook.memoizedState,
 		updateQueue: currentHook.updateQueue,
-		next: null
+		next: null,
+		baseQueue: currentHook.baseQueue,
+		baseState: currentHook.baseState
 	};
 	if (workInProgressHook === null) {
 		// mount时 第一个hook

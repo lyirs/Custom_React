@@ -82,6 +82,7 @@ export const processUpdateQueue = <State>(
 
 		do {
 			const updateLane = pending.lane;
+			// TODO isSubsetOfLanes(renderLanes, updateLanes)
 			if (!isSubsetOfLanes(renderLane, updateLane)) {
 				// 优先级不够 被跳过
 				const clone = createUpdate(pending.action, pending.lane);

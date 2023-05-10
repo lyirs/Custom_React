@@ -133,7 +133,7 @@ export const commitHookEffectListUnmount = (
 	lastEffect: Effect
 ) => {
 	commitHookEffectList(flags, lastEffect, (effect) => {
-		const destroy = effect.destory;
+		const destroy = effect.destroy;
 		if (typeof destroy === 'function') {
 			destroy();
 		}
@@ -146,7 +146,7 @@ export const commitHookEffectListDestroy = (
 	lastEffect: Effect
 ) => {
 	commitHookEffectList(flags, lastEffect, (effect) => {
-		const destroy = effect.destory;
+		const destroy = effect.destroy;
 		if (typeof destroy === 'function') {
 			destroy();
 		}
@@ -160,7 +160,7 @@ export const commitHookEffectListCreate = (
 	commitHookEffectList(flags, lastEffect, (effect) => {
 		const create = effect.create;
 		if (typeof create === 'function') {
-			effect.destory = create();
+			effect.destroy = create();
 		}
 	});
 };

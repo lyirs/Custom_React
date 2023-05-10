@@ -1,7 +1,7 @@
 import { Container } from 'hostConfig';
 import { ReactElementType } from 'shared/ReactTypes';
 import { FiberNode, FiberRootNode } from './fiber';
-import { requestUpdateLanes } from './fiberLanes';
+import { requestUpdateLane } from './fiberLanes';
 import {
 	createUpdate,
 	createUpdateQueue,
@@ -24,7 +24,7 @@ export const updateContainer = (
 	root: FiberRootNode
 ) => {
 	const hostRootFiber = root.current;
-	const lane = requestUpdateLanes();
+	const lane = requestUpdateLane();
 	const update = createUpdate<ReactElementType | null>(element, lane);
 	enqueueUpdate(
 		hostRootFiber.updateQueue as UpdateQueue<ReactElementType | null>,

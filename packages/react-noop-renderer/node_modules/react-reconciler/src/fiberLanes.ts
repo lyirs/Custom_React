@@ -21,7 +21,7 @@ export const mergeLanes = (laneA: Lane, laneB: Lane): Lanes => {
 	return laneA | laneB;
 };
 
-export const requestUpdateLanes = () => {
+export const requestUpdateLane = () => {
 	// 从上下文环境中获取Scheduler优先级
 	const currentSchedulerPriority = unstable_getCurrentPriorityLevel();
 	const lane = schedulerPriorityToLane(currentSchedulerPriority);
