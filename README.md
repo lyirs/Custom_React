@@ -291,3 +291,86 @@ pnpm i -D -w jest-react
 - 针对ReactDOM宿主环境：ReactTestUtils
 - 针对Reconciler的测试：React-Noop-Renderer
 - 针对并发环境的测试：jest-react、Scheduler、React-Noop-Renderer配合使用
+
+###  ♢ 实现并发更新
+要实现并发更新，需要做的改动包括：
+- Lane模型增加更多优先级
+- 交互与优先级对应
+- 调度阶段引入Scheduler，新增调度策略逻辑
+- render阶段可中断
+- 根据update计算state的算法需要修改
+
+##### 扩展调度阶段
+
+主要是在同步更新（微任务调度）的基础上扩展并发更新（Scheduler调度），主要包括:
+- 将Demo中的调度策略移到项目中
+- render阶段变为「可中断」
+
+梳理两种典型场景：
+- 时间切片
+- 高优先级更新打断低优先级更新
+
+##### 扩展state计算机制
+
+扩展「根据lane对应update计算state」的机制，主要包括：
+- 通过update计算state时可以跳过「优先级不够的update」
+- 由于「高优先级任务打断低优先级任务」，同一个组件中「根据update计算state」的流程可能会多次执行，所以需要保存update
+
+##### 跳过update需要考虑的问题
+
+如何比较「优先级是否足够」？
+
+如何同时兼顾「update的连续性」与「update的优先级」？
+
+新增baseState、baseQueue字段：
+- baseState是本次更新参与计算的初始state，memoizedState是上次更新计算的最终state
+- 如果本次更新没有update被跳过，则下次更新开始时baseState === memoizedState
+- 如果本次更新有update被跳过，则本次更新计算出的memoizedState为「考虑优先级」情况下计算的结果，baseState为「最后一个没被跳过的update计算后的结果」，下次更新开始时baseState !== memoizedState
+- 本次更新「被跳过的update及其后面的所有update」都会被保存在baseQueue中参与下次state计算
+- 本次更新「参与计算但保存在baseQueue中的update」，优先级会降低到NoLane
+  
+```
+// u0
+{
+  action: num => num + 1,
+  lane: DefaultLane
+}
+// u1
+{
+  action: 3,
+  lane: SyncLane
+}
+// u2
+{
+  action: num => num + 10,
+  lane: DefaultLane
+}
+
+/*
+* 第一次render
+* baseState = 0; memoizedState = 0; 
+* baseQueue = null; updateLane = DefaultLane;
+* 第一次render 第一次计算 
+* baseState = 1; memoizedState = 1; 
+* baseQueue = null;
+* 第一次render 第二次计算 
+* baseState = 1; memoizedState = 1; 
+* baseQueue = u1;
+* 第一次render 第三次计算 
+* baseState = 1; memoizedState = 11; 
+* baseQueue = u1 -> u2(NoLane);
+*/ 
+
+/*
+* 第二次render
+* baseState = 1; memoizedState = 11; 
+* baseQueue = u1 -> u2(NoLane); updateLane = SyncLane
+* 第二次render 第一次计算 
+* baseState = 3; memoizedState = 3; 
+* 第二次render 第二次计算 
+* baseState = 13; memoizedState = 13; 
+*/ 
+```
+
+##### 保存update的问题
+考虑将update保存在current中。只要不进入commit阶段，current与wip不会互换，所以保存在current中，即使多次执行render阶段，只要不进入commit阶段，都能从current中恢复数据。
