@@ -32,6 +32,10 @@ export const getHighestPriorityLane = (lanes: Lanes): Lane => {
 	return lanes & -lanes;
 };
 
+export const isSubsetOfLanes = (set: Lanes, subset: Lane) => {
+	return (set & subset) === subset;
+};
+
 export const markRootFinished = (root: FiberRootNode, lane: Lane) => {
 	root.pendingLanes &= ~lane;
 };
