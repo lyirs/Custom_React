@@ -374,3 +374,15 @@ pnpm i -D -w jest-react
 
 ##### 保存update的问题
 考虑将update保存在current中。只要不进入commit阶段，current与wip不会互换，所以保存在current中，即使多次执行render阶段，只要不进入commit阶段，都能从current中恢复数据。
+
+###  ♢ 实现useTransition
+useTransition的作用翻译成源码术语：
+
+- 切换UI -> 触发更新
+- 先显示旧的UI，待新的UI加载完成后再显示新的UI -> 「切换新UI」对应低优先级更新
+  
+实现的要点：
+
+- 实现基础hook工作流程
+- 实现Transition优先级
+- useTransition的实现细节
