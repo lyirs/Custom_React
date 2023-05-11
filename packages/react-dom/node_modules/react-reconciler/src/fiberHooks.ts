@@ -1,4 +1,5 @@
 import { Dispatch, Dispatcher } from 'react/src/currentDispatcher';
+import currentBatchConfig from 'react/src/currentBatchConfig';
 import internals from 'shared/internals';
 import { Action } from 'shared/ReactTypes';
 import { FiberNode } from './fiber';
@@ -230,9 +231,36 @@ const updateEffect = (
 	}
 };
 
-const mountTransition = (): [boolean, (callback: () => void) => void] => {};
+const startTransition = (
+	setPending: Dispatch<boolean>,
+	callback: () => void
+) => {
+	setPending(true);
+	const prevTransition = currentBatchConfig.transition;
+	currentBatchConfig.transition = 1;
 
-const updateTransition = (): [boolean, (callback: () => void) => void] => {};
+	callback();
+	setPending(false);
+
+	currentBatchConfig.transition = prevTransition;
+};
+
+const mountTransition = (): [boolean, (callback: () => void) => void] => {
+	const [isPending, setPending] = mountState(false);
+	const hook = mountWorkInProgressHook();
+
+	const start = startTransition.bind(null, setPending);
+	hook.memoizedState = start;
+
+	return [isPending, start];
+};
+
+const updateTransition = (): [boolean, (callback: () => void) => void] => {
+	const [isPending] = updateState();
+	const hook = updateWorkInProgressHook();
+	const start = hook.memoizedState;
+	return [isPending as boolean, start];
+};
 
 const areHookInputsEqual = (nextDeps: EffectDeps, prevDeps: EffectDeps) => {
 	if (prevDeps === null || nextDeps === null) {

@@ -5,7 +5,6 @@ import TabButton from './TabButton';
 import AboutTab from './AboutTab';
 import PostsTab from './PostsTab';
 import ContactTab from './ContactTab';
-import './style.css';
 
 function App() {
 	const [isPending, startTransition] = useTransition();
