@@ -230,6 +230,10 @@ const updateEffect = (
 	}
 };
 
+const mountTransition = (): [boolean, (callback: () => void) => void] => {};
+
+const updateTransition = (): [boolean, (callback: () => void) => void] => {};
+
 const areHookInputsEqual = (nextDeps: EffectDeps, prevDeps: EffectDeps) => {
 	if (prevDeps === null || nextDeps === null) {
 		return false;
@@ -251,12 +255,14 @@ const createFCUpdateQueue = <State>() => {
 
 const HooksDispatcherOnMount: Dispatcher = {
 	useState: mountState,
-	useEffect: mountEffect
+	useEffect: mountEffect,
+	useTransition: mountTransition
 };
 
 const HooksDispatcherOnUpdate: Dispatcher = {
 	useState: updateState,
-	useEffect: updateEffect
+	useEffect: updateEffect,
+	useTransition: updateTransition
 };
 
 const dispatchSetState = <State>(
