@@ -15,6 +15,7 @@ import {
 	commitHookEffectListCreate,
 	commitHookEffectListDestroy,
 	commitHookEffectListUnmount,
+	commitLayoutEffects,
 	commitMutationEffects
 } from './commitWork';
 import { completeWork } from './completeWork';
@@ -294,7 +295,8 @@ const commitRoot = (root: FiberRootNode) => {
 		// 2.mutation  Placement
 		commitMutationEffects(finishedWork, root);
 		root.current = finishedWork;
-		// TODO 3.layout
+		// 3.layout
+		commitLayoutEffects(finishedWork, root);
 	} else {
 		root.current = finishedWork;
 	}

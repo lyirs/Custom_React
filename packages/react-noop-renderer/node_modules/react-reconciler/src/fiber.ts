@@ -136,8 +136,12 @@ export const createWorkInProgress = (
 	wip.type = current.type;
 	wip.updateQueue = current.updateQueue;
 	wip.child = current.child;
+
 	wip.memoizedProps = current.memoizedProps;
 	wip.memoizedState = current.memoizedState;
+	wip.ref = current.ref;
+
+	wip.lanes = current.lanes;
 	return wip;
 };
 
@@ -145,7 +149,7 @@ export const createFiberFromElement = (
 	element: ReactElementType,
 	lanes: Lanes
 ): FiberNode => {
-	const { type, key, props } = element;
+	const { type, key, props, ref } = element;
 	let fiberTag: WorkTag = FunctionComponent;
 	if (typeof type === 'string') {
 		// <div/> type: 'div
@@ -155,6 +159,8 @@ export const createFiberFromElement = (
 	}
 	const fiber = new FiberNode(fiberTag, props, key);
 	fiber.type = type;
+	fiber.lanes = lanes;
+	fiber.ref = ref;
 	return fiber;
 };
 
