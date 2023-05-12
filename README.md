@@ -386,3 +386,19 @@ useTransition的作用翻译成源码术语：
 - 实现基础hook工作流程
 - 实现Transition优先级
 - useTransition的实现细节
+
+###  ♢ 实现useRef
+Ref数据结构：
+- ~~string~~
+- (instance: T) => void
+```
+<div ref={dom => console.log(dom)}></div>
+```
+- {current: T}
+```
+<div ref={domRef}></div>
+```
+
+HostComponent Ref工作流程:
+- 标记Ref
+- 执行Ref操作
