@@ -28,7 +28,7 @@ export class FiberNode {
 	pendingProps: Props;
 	key: Key;
 	stateNode: any;
-	ref: Ref;
+	ref: Ref | null;
 	return: FiberNode | null;
 	sibling: FiberNode | null;
 	child: FiberNode | null;
@@ -41,6 +41,9 @@ export class FiberNode {
 	subtreeFlags: Flags;
 	deletions: FiberNode[] | null;
 	updateQueue: unknown;
+
+	lanes: Lanes;
+
 	constructor(tag: WorkTag, pendingProps: Props, key: Key) {
 		this.tag = tag;
 		this.key = key || null;
@@ -71,6 +74,8 @@ export class FiberNode {
 		this.flags = NoFlags;
 		this.subtreeFlags = NoFlags;
 		this.deletions = null;
+
+		this.lanes = NoLane;
 	}
 }
 
@@ -137,7 +142,8 @@ export const createWorkInProgress = (
 };
 
 export const createFiberFromElement = (
-	element: ReactElementType
+	element: ReactElementType,
+	lanes: Lanes
 ): FiberNode => {
 	const { type, key, props } = element;
 	let fiberTag: WorkTag = FunctionComponent;
@@ -154,8 +160,10 @@ export const createFiberFromElement = (
 
 export const createFiberFromFragment = (
 	elements: any[],
+	lanes: Lanes,
 	key: Key
 ): FiberNode => {
 	const fiber = new FiberNode(Fragment, elements, key);
+	fiber.lanes = lanes;
 	return fiber;
 };

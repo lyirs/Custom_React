@@ -1,8 +1,9 @@
 import { ReactElementType } from 'shared/ReactTypes';
 import { mountChildFibers, reconcileChildFibers } from './childFibers';
 import { FiberNode } from './fiber';
+import { Ref } from './fiberFlags';
 import { renderWithHooks } from './fiberHooks';
-import { Lane } from './fiberLanes';
+import { Lane, Lanes } from './fiberLanes';
 import { processUpdateQueue, UpdateQueue } from './updateQueue';
 import {
 	Fragment,
@@ -13,25 +14,25 @@ import {
 } from './workTags';
 
 // 递归中的递阶段
-export const beginWork = (wip: FiberNode, renderLane: Lane) => {
+export const beginWork = (wip: FiberNode, renderLanes: Lanes) => {
 	// 与React Element比较，返回子fiberNode
 	switch (wip.tag) {
 		// HostRoot的beginwork工作流程
 		// 1.计算状态的最新值
 		// 2.创建子fiberNode
 		case HostRoot:
-			return updateHostRoot(wip, renderLane);
+			return updateHostRoot(wip, renderLanes);
 		// HostComponent的beginwork工作流程
 		// 1.创建子fiberNode
 		case HostComponent:
-			return updateHostComponent(wip);
+			return updateHostComponent(wip, renderLanes);
 		// HostText无子节点
 		case HostText:
 			return null;
 		case FunctionComponent:
-			return updateFunctionComponent(wip, renderLane);
+			return updateFunctionComponent(wip, renderLanes);
 		case Fragment:
-			return updateFragment(wip);
+			return updateFragment(wip, renderLanes);
 		default:
 			if (__DEV__) {
 				console.warn('beginwork未实现的类型');
@@ -41,47 +42,66 @@ export const beginWork = (wip: FiberNode, renderLane: Lane) => {
 	return null;
 };
 
-const updateFragment = (wip: FiberNode) => {
+const updateFragment = (wip: FiberNode, renderLanes: Lanes) => {
 	const nextChildren = wip.pendingProps;
-	reconcileChildren(wip, nextChildren);
+	reconcileChildren(wip, nextChildren, renderLanes);
 	return wip.child;
 };
 
-const updateFunctionComponent = (wip: FiberNode, renderLane: Lane) => {
-	const nextChildren = renderWithHooks(wip, renderLane);
-	reconcileChildren(wip, nextChildren);
+const updateFunctionComponent = (wip: FiberNode, renderLanes: Lanes) => {
+	const nextChildren = renderWithHooks(wip, renderLanes);
+	reconcileChildren(wip, nextChildren, renderLanes);
 	return wip.child;
 };
 
-const updateHostRoot = (wip: FiberNode, renderLane: Lane) => {
+const updateHostRoot = (wip: FiberNode, renderLanes: Lanes) => {
 	const baseState = wip.memoizedState;
 	const updateQueue = wip.updateQueue as UpdateQueue<Element>;
 	const pending = updateQueue.shared.pending;
 	updateQueue.shared.pending = null;
-	const { memoizedState } = processUpdateQueue(baseState, pending, renderLane);
+	const { memoizedState } = processUpdateQueue(baseState, pending, renderLanes);
 	wip.memoizedState = memoizedState;
 
 	const nextChildren = wip.memoizedState;
-	reconcileChildren(wip, nextChildren);
+	reconcileChildren(wip, nextChildren, renderLanes);
 	return wip.child;
 };
 
-const updateHostComponent = (wip: FiberNode) => {
+const updateHostComponent = (wip: FiberNode, renderLanes: Lanes) => {
 	const nextProps = wip.pendingProps;
 	const nextChildren = nextProps.children;
-	reconcileChildren(wip, nextChildren);
+	markRef(wip.alternate, wip);
+	reconcileChildren(wip, nextChildren, renderLanes);
 	return wip.child;
 };
 
-const reconcileChildren = (wip: FiberNode, children?: ReactElementType) => {
+const reconcileChildren = (
+	wip: FiberNode,
+	children: any,
+	renderLanes: Lanes
+) => {
 	// 对比子current fiberNode与子reactElement生成子对应的wip fiberNode
 	const current = wip.alternate;
 
 	if (current !== null) {
 		// update
-		wip.child = reconcileChildFibers(wip, current?.child, children);
+		wip.child = reconcileChildFibers(wip, current.child, children, renderLanes);
 	} else {
 		// mount
-		wip.child = mountChildFibers(wip, null, children);
+		wip.child = mountChildFibers(wip, null, children, renderLanes);
+	}
+};
+
+// 标记Ref需要满足：
+// mount时：存在ref
+// update时：ref引用变化
+
+const markRef = (current: FiberNode | null, workInProgress: FiberNode) => {
+	const ref = workInProgress.ref;
+	if (
+		(current === null && ref !== null) ||
+		(current !== null && current.ref !== ref)
+	) {
+		workInProgress.flags |= Ref;
 	}
 };

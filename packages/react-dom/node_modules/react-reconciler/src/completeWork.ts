@@ -5,8 +5,9 @@ import {
 	createTextInstance,
 	Instance
 } from 'hostConfig';
+import { updateFiberProps } from 'react-dom/src/SyntheticEvent';
 import { FiberNode } from './fiber';
-import { NoFlags, Update } from './fiberFlags';
+import { NoFlags, Ref, Update } from './fiberFlags';
 import {
 	Fragment,
 	FunctionComponent,
@@ -17,6 +18,10 @@ import {
 
 const markUpdate = (fiber: FiberNode) => {
 	fiber.flags |= Update;
+};
+
+const markRef = (fiber: FiberNode) => {
+	fiber.flags |= Ref;
 };
 // 递归中的归阶段
 export const completeWork = (wip: FiberNode) => {
@@ -29,7 +34,11 @@ export const completeWork = (wip: FiberNode) => {
 				// TODO update
 				// 1.判断props是否变化
 				// 2.变化 Update flag
-				markUpdate(wip);
+				updateFiberProps(wip.stateNode, newProps);
+				// 标记Ref
+				if (current.ref !== wip.ref) {
+					markRef(wip);
+				}
 			} else {
 				// mount
 				// 1. 构建DOM
@@ -37,6 +46,10 @@ export const completeWork = (wip: FiberNode) => {
 				// 2. 将DOM插入到DOM树中
 				appendAllChildren(instance, wip);
 				wip.stateNode = instance;
+				// 标记Ref
+				if (wip.ref !== null) {
+					markRef(wip);
+				}
 			}
 			bubbleProperties(wip);
 			return null;

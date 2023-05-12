@@ -261,6 +261,18 @@ const updateTransition = (): [boolean, (callback: () => void) => void] => {
 	return [isPending as boolean, start];
 };
 
+const mountRef = <T>(initialValue: T): { current: T } => {
+	const hook = mountWorkInProgressHook();
+	const ref = { current: initialValue };
+	hook.memoizedState = ref;
+	return ref;
+};
+
+const updateRef = <T>(initialValue: T): { current: T } => {
+	const hook = updateWorkInProgressHook();
+	return hook.memoizedState;
+};
+
 const areHookInputsEqual = (nextDeps: EffectDeps, prevDeps: EffectDeps) => {
 	if (prevDeps === null || nextDeps === null) {
 		return false;
@@ -283,13 +295,15 @@ const createFCUpdateQueue = <State>() => {
 const HooksDispatcherOnMount: Dispatcher = {
 	useState: mountState,
 	useEffect: mountEffect,
-	useTransition: mountTransition
+	useTransition: mountTransition,
+	useRef: mountRef
 };
 
 const HooksDispatcherOnUpdate: Dispatcher = {
 	useState: updateState,
 	useEffect: updateEffect,
-	useTransition: updateTransition
+	useTransition: updateTransition,
+	useRef: updateRef
 };
 
 const dispatchSetState = <State>(
