@@ -402,3 +402,41 @@ Ref数据结构：
 HostComponent Ref工作流程:
 - 标记Ref
 - 执行Ref操作
+
+
+###  ♢ 实现useContext
+context相关实现细节：
+
+- Context数据结构（createContext的返回值）
+- JSX类型 ctx.Provider
+- useContext实现
+
+还没实现bailout，所以实现context不需要考虑这种情况(shouldComponentUpdate标记不用更新，hook又标记需要更新):
+```
+const ctx = createContext(null);
+
+function App() {
+  const [num, update] = useState(0);
+  return (
+    <ctx.Provider value={num}>
+        <div onClick={() => update(Math.random())}>
+          <Middle />
+        </div>
+    </ctx.Provider>
+  );
+}
+
+class Middle extends Component {
+    shouldComponentUpdate() {
+        return false;
+    }
+    render() {
+        return <Child />;
+    }
+}
+
+function Child() {
+  const val = useContext(ctx);
+  return <p>{val}</p>;
+}
+```
