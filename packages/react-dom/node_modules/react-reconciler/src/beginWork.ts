@@ -6,6 +6,7 @@ import { renderWithHooks } from './fiberHooks';
 import { Lane, Lanes } from './fiberLanes';
 import { processUpdateQueue, UpdateQueue } from './updateQueue';
 import {
+	ContextProvider,
 	Fragment,
 	FunctionComponent,
 	HostComponent,
@@ -33,6 +34,8 @@ export const beginWork = (wip: FiberNode, renderLanes: Lanes) => {
 			return updateFunctionComponent(wip, renderLanes);
 		case Fragment:
 			return updateFragment(wip, renderLanes);
+		case ContextProvider:
+			return updateContextProvider(wip, renderLanes);
 		default:
 			if (__DEV__) {
 				console.warn('beginwork未实现的类型');
@@ -40,6 +43,13 @@ export const beginWork = (wip: FiberNode, renderLanes: Lanes) => {
 			break;
 	}
 	return null;
+};
+
+const updateContextProvider = (wip: FiberNode, renderLanes: Lanes) => {
+	// TODO
+	const nextChildren = wip.pendingProps;
+	reconcileChildren(wip, nextChildren, renderLanes);
+	return wip.child;
 };
 
 const updateFragment = (wip: FiberNode, renderLanes: Lanes) => {
