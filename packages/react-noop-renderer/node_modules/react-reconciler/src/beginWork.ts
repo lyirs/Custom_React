@@ -1,6 +1,7 @@
 import { ReactElementType } from 'shared/ReactTypes';
 import { mountChildFibers, reconcileChildFibers } from './childFibers';
 import { FiberNode } from './fiber';
+import { pushProvider } from './fiberContext';
 import { Ref } from './fiberFlags';
 import { renderWithHooks } from './fiberHooks';
 import { Lane, Lanes } from './fiberLanes';
@@ -46,7 +47,23 @@ export const beginWork = (wip: FiberNode, renderLanes: Lanes) => {
 };
 
 const updateContextProvider = (wip: FiberNode, renderLanes: Lanes) => {
-	// TODO
+	// context入栈
+	// {
+	// 	$$typeof: REACT_PROVIDER_TYPE,
+	// 	_context: context
+	// };
+	const providerType = wip.type;
+	const context = providerType._context;
+	const oldProps = wip.memoizedProps;
+	const newProps = wip.pendingProps;
+	const newValue = newProps.value;
+
+	if (__DEV__ && !('value' in newProps)) {
+		console.warn('<Context.Provider>需要传递value props');
+	}
+
+	pushProvider(context, newValue);
+
 	const nextChildren = wip.pendingProps;
 	reconcileChildren(wip, nextChildren, renderLanes);
 	return wip.child;
