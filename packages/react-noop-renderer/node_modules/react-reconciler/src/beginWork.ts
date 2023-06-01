@@ -64,7 +64,7 @@ const updateContextProvider = (wip: FiberNode, renderLanes: Lanes) => {
 
 	pushProvider(context, newValue);
 
-	const nextChildren = wip.pendingProps;
+	const nextChildren = newProps.children;
 	reconcileChildren(wip, nextChildren, renderLanes);
 	return wip.child;
 };

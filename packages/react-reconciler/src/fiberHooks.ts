@@ -1,7 +1,7 @@
 import { Dispatch, Dispatcher } from 'react/src/currentDispatcher';
 import currentBatchConfig from 'react/src/currentBatchConfig';
 import internals from 'shared/internals';
-import { Action } from 'shared/ReactTypes';
+import { Action, ReactContext } from 'shared/ReactTypes';
 import { FiberNode } from './fiber';
 import { Flags, PassiveEffect } from './fiberFlags';
 import { Lane, NoLane, requestUpdateLane } from './fiberLanes';
@@ -292,18 +292,29 @@ const createFCUpdateQueue = <State>() => {
 	return updateQueue;
 };
 
+const readContext = <T>(context: ReactContext<T>) => {
+	const consumer = currentlyRenderingFiber;
+	if (consumer === null) {
+		throw new Error('context需要有consumer');
+	}
+	const value = context._currentValue;
+	return value;
+};
+
 const HooksDispatcherOnMount: Dispatcher = {
 	useState: mountState,
 	useEffect: mountEffect,
 	useTransition: mountTransition,
-	useRef: mountRef
+	useRef: mountRef,
+	useContext: readContext
 };
 
 const HooksDispatcherOnUpdate: Dispatcher = {
 	useState: updateState,
 	useEffect: updateEffect,
 	useTransition: updateTransition,
-	useRef: updateRef
+	useRef: updateRef,
+	useContext: readContext
 };
 
 const dispatchSetState = <State>(
