@@ -62,6 +62,15 @@ const updateContextProvider = (wip: FiberNode, renderLanes: Lanes) => {
 		console.warn('<Context.Provider>需要传递value props');
 	}
 
+	if (newValue !== oldProps.value) {
+		// TODO
+		// context.value变化
+		// 从Provider向下DFS，寻找消费了当前变化的context的consumer
+		// 如果找到consumer，从consumer向上遍历到Provider
+		// 标记沿途组件存在更新
+		console.log('未实现bailout');
+	}
+
 	pushProvider(context, newValue);
 
 	const nextChildren = newProps.children;
